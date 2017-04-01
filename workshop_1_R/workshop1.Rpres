@@ -6,15 +6,93 @@
 
 Introduction to R
 ========================================================
-author: Grace Yoo, Galen Long
-date: 2016-04-01
+author: Martha Miller, Eddie Pantridge
+date: 2017-03-31
 css: style.css 
 
 
-Download data
+Download R and R Studio
 ========================================================
 
-https://www.dropbox.com/s/7v6i3rc58juy6z6/workshops.csv?dl=0
+https://www.r-project.org/
+
+https://www.rstudio.com/products/rstudio/download/
+
+
+Setting Variables
+========================================================
+
+```{r}
+# Sets the variable x to 5
+x <- 5
+
+# Evaluates the variable 5
+x
+```
+
+
+Data Types
+========================================================
+
+```{r}
+s <- "HelloWorld" 
+s
+```
+
+```{r}
+x <- 5
+y <- 0.2
+z <- x + y
+z
+as.character(z)
+```
+
+
+Data Types (cont.)
+========================================================
+
+```{r}
+b <- T 
+b
+```
+
+```{r}
+if (x > 5) {
+  "Data"
+} else {
+  "Fest"
+}
+```
+
+
+Data Types (cont.)
+========================================================
+
+```{r}
+my_vector <- c(1, 2, 3, 2, 1)
+my_vector
+
+sum(my_vector)
+```
+
+
+Loops
+========================================================
+
+```{r}
+1:5
+
+for (i in 1:5) {
+  print(i * i)
+}
+```
+
+
+Questions?
+========================================================
+
+Take 5 minutes to exeriments with different data types,
+vectors, loops, if, etc.
 
 
 Loading data
