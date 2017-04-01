@@ -1,0 +1,307 @@
+---
+title: 'Visualization in R'
+author: Freddie Sanchez (Slides by Deirdre Fitzpatrick)
+date: August 2, 2016
+autosize: true
+output: 
+  revealjs::revealjs_presentation:
+    theme: sky
+    center: true
+    transition: slide
+---
+
+## GGPlot2
+
+- Library in R that makes nice graphics
+- Makes creation of good looking, useful graphics much easier than base R
+- Can make very diverse plots
+
+## Set Up
+
+```{r message=FALSE, warning=FALSE}
+# install.packages('ggplot2')
+library(ggplot2)
+```
+
+## Data
+
+```{r message=FALSE}
+# install.packages('nycflights13')
+# install.packages('dplyr')
+library(nycflights13)
+library(dplyr)
+head(flights)
+```
+
+## Basic Plots
+
+- Scatter Plot
+- Line Chart
+- Bar Chart
+- Histogram
+- Density Plot
+- Box Plot
+
+## Initialization
+
+- Initialize empty graphic
+- We will add our plot to this base plot
+- Feed base plot data, x and y values
+
+## Initialization Continued
+
+```{r warning=FALSE, fig.width=15, cache=TRUE}
+plot <- ggplot(flights, aes(dep_delay, arr_delay))
+plot
+```
+
+## Scatter Plot
+
+```{r warning=FALSE, fig.width=15, cache=TRUE}
+plot + geom_point()
+```
+
+## Scatter Plot Continued
+
+```{r warning=FALSE, fig.width=15, cache=TRUE}
+plot + geom_point(colour='blue', size=5, shape=25, alpha=.01)
+```
+
+## Scatter Plot Continued
+
+```{r warning=FALSE, fig.width=15, cache=TRUE}
+plot + geom_point(aes(colour=origin))
+```
+
+## Line Chart
+
+```{r warning=FALSE, fig.width=15, cache=TRUE}
+plot + geom_point() + 
+  geom_smooth(aes(colour=factor(origin)), method='lm')
+```
+
+## You Try
+Create a line chart with points as well.
+Place distance on the x axis and air time on the y axis. 
+Use the origin as a factor for color for the lines and shape of the points.
+Make the points have alpha of .1 and be purple in color.
+Make sure you use a linear model as your method.
+
+## You Try - Answer
+
+```{r warning=FALSE, fig.width=15, cache=TRUE}
+ggplot(flights, aes(distance, air_time)) + 
+  geom_point(aes(shape=origin), alpha=.1, colour='purple') + 
+  geom_smooth(aes(colour=origin), method='lm')
+```
+
+## Box Plot
+
+```{r warning=FALSE, fig.width=15, cache=TRUE}
+plot2 <- ggplot(flights, aes(distance, air_time))
+plot2 + geom_boxplot(outlier.colour='red', outlier.shape=25)
+```
+
+## Bar Chart
+
+```{r warning=FALSE, fig.width=15, cache=TRUE}
+plot <- ggplot(flights, aes(carrier))
+plot + geom_bar(aes(weight=arr_delay, fill=origin), position='dodge')
+```
+
+## Histogram
+
+```{r warning=FALSE, message=FALSE, fig.width=15, cache=TRUE}
+plot <- ggplot(flights, aes(arr_delay))
+plot + geom_histogram(aes(fill=origin, colour=origin))
+```
+
+## Histogram Continued
+
+```{r warning=FALSE, message=FALSE, fig.width=15, cache=TRUE}
+plot + geom_histogram(binwidth = 0.5)
+```
+
+## Histogram Continued
+
+```{r warning=FALSE, message=FALSE, fig.width=15, cache=TRUE}
+plot + geom_histogram(bins = 100)
+```
+
+## Histogram Continued
+
+```{r warning=FALSE, message=FALSE, fig.width=15, cache=TRUE}
+plot + geom_histogram(aes(y=..density..))
+```
+
+## Density Chart
+
+```{r warning=FALSE, fig.width=15, cache=TRUE}
+plot + geom_density()
+```
+
+## Density Chart Continued
+
+```{r warning=FALSE, fig.width=15, cache=TRUE}
+plot + 
+  geom_density(aes(colour=origin, fill=origin), position='stack') + 
+  xlim(0, 50)
+```
+
+## You Try
+Create a histogram of departure delay.
+Use 100 bins.
+Add a density chart of the same data.
+Make the line and fill color red, with an alpha of .1.
+Zoom in so the x axis only goes from 0 to 200.
+
+## You Try - Answer
+
+```{r warning=FALSE, fig.width=15, cache=TRUE}
+ggplot(flights, aes(dep_delay)) + 
+  geom_histogram(aes(y=..density..), bins=100) + 
+  geom_density(colour='red', fill='red', alpha=.1) + 
+  xlim(c(0, 200))
+```
+
+## Map Data
+
+```{r message=FALSE, warning=FALSE, cache=TRUE}
+# install.packages('maps')
+# install.packages('choroplethr')
+library(maps)
+library(choroplethr)
+data(df_state_demographics)
+states <- map_data('state')
+map_data <- merge(df_state_demographics, states, by='region')
+```
+
+## Map Data
+
+```{r warning=FALSE, cache=TRUE}
+head(map_data)
+```
+
+## Basic Map
+
+```{r warning=FALSE, fig.width=15, cache=TRUE}
+plot <- ggplot(map_data, aes(long, lat))
+plot + geom_polygon(aes(group=group, fill=median_rent))
+```
+
+## You Try
+Create a map of the US where the color is median age.
+
+## You Try - Answer
+
+```{r warning=FALSE, fig.width=15, cache=TRUE}
+data(df_state_demographics)
+states <- map_data('state')
+map_data <- merge(df_state_demographics, states, by='region')
+ggplot(map_data, aes(long, lat)) + 
+  geom_polygon(aes(group=group, fill=median_age))
+```
+
+## More Complex Maps
+
+```{r warning=FALSE, cache=TRUE}
+labels <- map_data %>% group_by(region) %>% 
+  summarise(lat=mean(unique(lat)), long=mean(unique(long)))
+head(labels)
+```
+
+## More Complex Maps
+
+```{r warning=FALSE, cache=TRUE}
+new_plot <- plot +
+  # add outlines
+  geom_polygon(aes(group=region, fill=median_rent), 
+               colour='black', size = .2, alpha = 0.5) + 
+  # add new color information
+  scale_fill_gradient2(midpoint = median(map_data$median_rent), 
+                       limits=c(min(map_data$median_rent), 
+                                max(map_data$median_rent)), 
+                       low='red', mid='white', high='blue')
+```
+
+## More Complex Maps
+
+```{r warning=FALSE, fig.width=15}
+new_plot
+```
+
+## Resources
+
+
+- <http://docs.ggplot2.org/current/> 
+- <https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf>
+
+## Plotly
+
+
+- Library in R that makes interactive web-based graphics
+- Leverages JavaScript library plotly.js
+- Can host them online if you create a plotly account
+
+## Set Up
+
+```{r message=FALSE, warning=FALSE}
+# install.packages('plotly')
+library(plotly)
+```
+
+## Data
+
+```{r warning=FALSE}
+head(diamonds)
+set.seed(2)
+d <- diamonds[sample(nrow(diamonds), 1000), ]
+m = list(l = 50, r = 50, b = 100, t = 100, pad = 4)
+```
+
+## GGPlot & Plotly
+
+```{r warning=FALSE}
+plot <- ggplot(d, aes(carat, price)) +
+  geom_point(aes(colour=factor(cut))) +
+  geom_smooth() + 
+  facet_wrap(~ cut)
+ggplotly(plot) %>%
+  layout(autosize = F, width = 1000, height = 400, margin = m)
+```
+
+## GGPlot & Plotly Continued
+
+```{r warning=FALSE}
+ggplotly(new_plot) %>%
+  layout(autosize = F, width = 1000, height = 500, margin = m)
+```
+
+## You Try
+Remember the histogram and density plot you made earlier?
+Create a histogram of departure delay.
+Use 100 bins.
+Add a density chart of the same data.
+Make the line and fill color red, with an alpha of .1.
+Zoom in so the x axis only goes from 0 to 200.
+Make it with ggplotly!
+
+## You Try - Answer
+
+```{r warning=FALSE}
+p <- ggplot(flights, aes(dep_delay)) + 
+  geom_histogram(aes(y=..density..), bins=100) + 
+  geom_density(colour='red', fill='red', alpha=.1) + 
+  xlim(c(0, 200))
+ggplotly(p) %>%
+  layout(autosize = F, width = 1000, height = 400, margin = m)
+```
+
+
+## Resources
+
+- <https://plot.ly/r/> 
+
+## Thanks!
+- Contact: FreddieSanchez@MassMutual.com
+- Talk to us about viz in R, MassMutual, the DSDP, or other data science topics!
