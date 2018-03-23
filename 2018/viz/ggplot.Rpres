@@ -16,15 +16,46 @@ ggplot2
 - Library in R that makes nice graphics
 - Makes creation of good looking, useful graphics much easier than base R
 - Can make very diverse plots
+- Works seamlessly with dplyr
 
-Definitions
+Definitions: Aesthetics
 ========================================================
 
-- Aesthetics: mapping of information to a visual property
-  - Color
-  - Position
-- Makes creation of good looking, useful graphics much easier than base R
-- Can make very diverse plots
+- Mapping of information to a visual property
+  - Categorical -> Color
+  - Numerical -> Position
+  - ...
+
+Definitions: Aesthetics
+========================================================
+
+- Mapping of information to a visual property
+  - Categorical -> Color
+  - Numerical -> Position
+  - Categorical -> Shape
+  - Numerical -> Color
+  - Numerical -> Size
+  - Numerical -> Transparency
+  - ...
+
+Definitions: "Geoms"
+========================================================
+
+- A geometric object
+  - Point
+  - Line
+  - ...
+
+Definitions: "Geoms"
+========================================================
+
+- A geometric object
+  - Point
+  - Line
+  - Bar
+  - Box-and-whisker
+  - Polygon
+
 
 Set Up
 ========================================================
@@ -63,10 +94,11 @@ Initialization Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot <- ggplot(flights, aes(dep_delay, arr_delay))
+plot <- ggplot(flights, aes(x = dep_delay, y = arr_delay))
 plot
 ```
-
+Tip: Specify aesthetics in the main ggplot call to keep the mapping
+consistent across different geoms
 
 Scatter Plot
 ========================================================
@@ -79,28 +111,23 @@ Scatter Plot Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot + geom_point(colour='blue', size=5, shape=25, alpha=.01)
-```
-
-Scatter Plot Continued
-========================================================
-class: small-code
-```{r fig.width=18}
 plot + geom_point(aes(colour=factor(origin)))
 ```
+We can also add aesthetic mappings for individual geoms using aes()
 
 Scatter Plot Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot + geom_point(aes(size=distance, shape=factor(origin)))
+plot + geom_point(colour='blue', size=5, shape=25, alpha=.01)
 ```
+We can hard-code values within geoms by passing them in as arguments WITHOUT using aes()
 
 Scatter Plot Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot + geom_point(aes(shape=factor(origin)))
+plot + geom_point(aes(size=distance, shape=factor(origin)), color = 'blue')
 ```
 
 Line Chart
