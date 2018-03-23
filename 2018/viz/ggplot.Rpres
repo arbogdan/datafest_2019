@@ -21,40 +21,41 @@ ggplot2
 Definitions: Aesthetics
 ========================================================
 
-- Mapping of information to a visual property
-  - Categorical -> Color
-  - Numerical -> Position
-  - ...
+Mapping of information to a visual property
+- Categorical -> Color
+- Numerical -> Position
+- ...
 
 Definitions: Aesthetics
 ========================================================
 
-- Mapping of information to a visual property
-  - Categorical -> Color
-  - Numerical -> Position
-  - Categorical -> Shape
-  - Numerical -> Color
-  - Numerical -> Size
-  - Numerical -> Transparency
-  - ...
+Mapping of information to a visual property
+- Categorical -> Color
+- Numerical -> Position
+- Categorical -> Shape
+- Numerical -> Color
+- Numerical -> Size
+- Numerical -> Transparency
+- ...
 
-Definitions: "Geoms"
+Definitions: Geoms
 ========================================================
 
-- A geometric object
-  - Point
-  - Line
-  - ...
+A geometric object
+- Point
+- Line
+- ...
 
-Definitions: "Geoms"
+Definitions: Geoms
 ========================================================
 
-- A geometric object
-  - Point
-  - Line
-  - Bar
-  - Box-and-whisker
-  - Polygon
+A geometric object
+- Point
+- Line
+- Bar
+- Box-and-whisker
+- Polygon
+- ...
 
 
 Set Up
@@ -75,6 +76,18 @@ library(nycflights13)
 library(dplyr)
 head(flights)
 ```
+
+A typical ggplot2 call & translation
+========================================================
+```{r fig.width=18}
+ggplot(flights, aes(x = dep_delay, y = arr_delay)) +
+  geom_point() +
+  geom_smooth()
+```
+We pass *data* into the ggplot function,
+add *geoms* separated by `+`,
+and specify *aesthetics* with `aes()`
+
 
 Basic Plots
 ========================================================
@@ -98,6 +111,7 @@ class: small-code
 plot <- ggplot(flights, aes(x = dep_delay, y = arr_delay))
 plot
 ```
+We have specified aesthetics, but haven't added any geoms!
 Tip: Specify aesthetics in the main ggplot call to keep the mapping
 consistent across different geoms
 
@@ -112,7 +126,7 @@ Scatter Plot Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot + geom_point(aes(colour=factor(origin)))
+plot + geom_point(aes(color = factor(origin)))
 ```
 We can also add aesthetic mappings for individual geoms using aes()
 
@@ -120,7 +134,7 @@ Scatter Plot Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot + geom_point(colour='blue', size=5, shape=25, alpha=.01)
+plot + geom_point(color = 'blue', size = 5, shape = 25, alpha = .01)
 ```
 We can hard-code values within geoms by passing them in as arguments WITHOUT using aes()
 
@@ -128,7 +142,7 @@ Scatter Plot Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot + geom_point(aes(size=distance, shape=factor(origin)), color = 'blue')
+plot + geom_point(aes(size = distance, shape = factor(origin)), color = 'blue')
 ```
 
 Line Chart
@@ -142,28 +156,28 @@ Line Chart Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot + geom_point() + geom_smooth(span=.01)
+plot + geom_point() + geom_smooth(span = .01)
 ```
 
 Line Chart Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot + geom_point() + geom_smooth(span=.9)
+plot + geom_point() + geom_smooth(span = .9)
 ```
 
 Line Chart Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot + geom_point() + geom_smooth(method='lm')
+plot + geom_point() + geom_smooth(method = 'lm')
 ```
 
 Line Chart Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot + geom_point() + geom_smooth(aes(colour=factor(origin)), method='lm')
+plot + geom_point() + geom_smooth(aes(color = factor(origin)), method = 'lm')
 ```
 
 Box Plot
@@ -299,17 +313,28 @@ Density Chart Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot + geom_density(aes(colour=factor(origin), fill=factor(origin)), position='stack')
+plot + geom_density(aes(colour = factor(origin), fill = factor(origin)), position='stack')
 ```
 
 Density Chart Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-ggplot(flights, aes(arr_delay, ..count.., colour=factor(origin),
+ggplot(flights, aes(arr_delay, ..count.., color = factor(origin),
                     fill = factor(origin))) +
-  geom_density(position='stack')
+  geom_density(position = 'stack')
 ```
+
+Some additional options
+========================================================
+- `... + xlim(c(1, 10)) + ylim(c(50, 100)`: crop X and/or Y axis
+- `... + facet_wrap(~carrier)`: make subplots by factor value
+
+
+How to Get Help
+========================================================
+In the console, type `?geom_point` to pull up documentation
+
 
 Other topics
 ========================================================
