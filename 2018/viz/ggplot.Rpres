@@ -70,6 +70,7 @@ class: small-code
 ```{r}
 # install.packages('nycflights13')
 # install.packages('dplyr')
+library(tidyverse)
 library(nycflights13)
 library(dplyr)
 head(flights)
@@ -310,8 +311,28 @@ ggplot(flights, aes(arr_delay, ..count.., colour=factor(origin),
   geom_density(position='stack')
 ```
 
-Map Data
+Other topics
 ========================================================
+
+-Interaction : making your ggplots interactive!
+-Other fun graphs : Maps!
+
+Plotly and ggplot
+========================================================
+
+- Open source tools that allows interactibe graphics
+- Has a function to neatly convert ggplots to inteactive plots
+class: small-code
+```{r}
+library("plotly")
+ggflights<- ggplot2::ggplot(flights, aes(arr_delay, ..count.., colour=factor(origin),fill = factor(origin))) + geom_density(position='stack')
+
+#ggplotly(ggflights)
+```
+
+Maps
+========================================================
+
 class: small-code
 ```{r}
 # install.packages('maps')
@@ -423,62 +444,11 @@ plot +
         plot.background = element_blank())
 ```
 
-More Complex Maps
+
+More Resources
 ========================================================
-class: small-code
-```{r}
-labels <- data %>% group_by(region) %>% summarise(lat=mean(unique(lat)), long=mean(unique(long)))
-head(labels)
-```
-
-More Complex Maps
-========================================================
-class: small-code
-```{r eval=FALSE}
-new_plot <- plot +
-  geom_polygon(aes(group=group, fill=median_rent),
-               colour='black', size = .2, alpha = 0.5) +
-  scale_fill_gradient2(midpoint = median(data$median_rent),
-                       limits=c(min(data$median_rent),
-                                max(data$median_rent)),
-                       low='red', mid='white', high='blue') +
-    theme(axis.line = element_blank(), axis.text.x = element_blank(),
-        axis.text.y = element_blank(), axis.ticks = element_blank(),
-        axis.title.x = element_blank(), axis.title.y = element_blank(),
-        panel.background = element_blank(), panel.border = element_blank(),
-        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        plot.background = element_blank())
-```
-
-More Complex Maps
-========================================================
-class: small-code
-```{r echo=FALSE, fig.width=18}
-plot +
-  geom_polygon(aes(group=group, fill=median_rent),
-               colour='black', size = .2, alpha = 0.5) +
-  scale_fill_gradient2(midpoint = median(data$median_rent),
-                       limits=c(min(data$median_rent),
-                                max(data$median_rent)),
-                       low='red', mid='white', high='blue') +
-  theme(axis.line = element_blank(), axis.text.x = element_blank(),
-        axis.text.y = element_blank(), axis.ticks = element_blank(),
-        axis.title.x = element_blank(), axis.title.y = element_blank(),
-        panel.background = element_blank(), panel.border = element_blank(),
-        panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        plot.background = element_blank()) +
-  annotate("text", x=labels$long, y=labels$lat, label=labels$region,
-           color = "midnightblue", size = 3)
-
-```
-
-Resources
-========================================================
-
+Tons of more resrouces , try them out!
 - <http://docs.ggplot2.org/current/>
 - <https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf>
-- This Presentation: <https://github.com/massmutual/datafest2016>
+- <http://www.sthda.com/english/wiki/be-awesome-in-ggplot2-a-practical-guide-to-be-highly-effective-r-software-and-data-visualization>
 
-Feedback
-========================================================
-- <http://goo.gl/forms/rHnscEWjTL>
