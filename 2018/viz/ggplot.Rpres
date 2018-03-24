@@ -15,8 +15,12 @@ ggplot2
 
 - Library in R that makes nice graphics
 - Makes creation of good looking, useful graphics much easier than base R
-- Can make very diverse plots
-- Works seamlessly with dplyr
+- Consistent with a *grammar of graphics*
+
+ggplot2
+========================================================
+Plot = Data + Aesthetics + Geometric Objects
+
 
 Definitions: Aesthetics
 ========================================================
@@ -151,6 +155,8 @@ class: small-code
 ```{r fig.width=18}
 plot + geom_point() + geom_smooth()
 ```
+Some geoms do *statistical transformations* on the data that can be
+further configured
 
 Line Chart Continued
 ========================================================
@@ -192,21 +198,21 @@ Box Plot Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot2 + geom_boxplot(fill='lightblue', colour='black')
+plot2 + geom_boxplot(fill = 'lightblue', colour = 'black')
 ```
 
 Box Plot Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot2 + geom_boxplot(outlier.colour='red', outlier.shape=25)
+plot2 + geom_boxplot(outlier.colour = 'red', outlier.shape = 25)
 ```
 
 Box Plot Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot2 + geom_boxplot(aes(colour=factor(origin)))
+plot2 + geom_boxplot(aes(color = factor(origin)))
 ```
 
 Bar Chart
@@ -221,28 +227,28 @@ Bar Chart Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot + geom_bar(aes(weight=arr_delay))
+plot + geom_bar(aes(weight = arr_delay))
 ```
 
 Bar Chart Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot + geom_bar(aes(fill=factor(origin)))
+plot + geom_bar(aes(fill = factor(origin)))
 ```
 
 Bar Chart Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot + geom_bar(aes(fill=factor(origin)), position='dodge')
+plot + geom_bar(aes(fill = factor(origin)), position = 'dodge')
 ```
 
 Bar Chart Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot + geom_bar(aes(fill=factor(origin)), position='fill')
+plot + geom_bar(aes(fill = factor(origin)), position = 'fill')
 ```
 
 Histogram
@@ -271,14 +277,14 @@ Histogram Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot + geom_histogram(aes(fill=factor(origin)))
+plot + geom_histogram(aes(fill = factor(origin)))
 ```
 
 Histogram Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot + geom_histogram(aes(colour=factor(origin)))
+plot + geom_histogram(aes(color = factor(origin)))
 ```
 
 Density Chart
@@ -292,28 +298,28 @@ Density Chart Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot + geom_density(adjust=.01)
+plot + geom_density(adjust = .01)
 ```
 
 Density Chart Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot + geom_density(adjust=100)
+plot + geom_density(adjust = 100)
 ```
 
 Density Chart Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot + geom_density(aes(colour=factor(origin), fill=factor(origin)))
+plot + geom_density(aes(color = factor(origin), fill = factor(origin)))
 ```
 
 Density Chart Continued
 ========================================================
 class: small-code
 ```{r fig.width=18}
-plot + geom_density(aes(colour = factor(origin), fill = factor(origin)), position='stack')
+plot + geom_density(aes(color = factor(origin), fill = factor(origin)), position = 'stack')
 ```
 
 Density Chart Continued
@@ -331,16 +337,37 @@ Some additional options
 - `... + facet_wrap(~carrier)`: make subplots by factor value
 
 
+Finishing Touches
+========================================================
+```{r fig.width=18}
+ggplot(flights, aes(arr_delay)) +
+  geom_histogram() +
+  xlim(c(-50, 300)) +
+  facet_wrap(~origin, scales = 'free_y') +
+  ylab('Count') + xlab('Delay') +
+  ggtitle('Number of Delayed Flights by Origin') +
+  theme_minimal()
+```
+Use `ggsave(filename)` to save the most recently displayed plot to a file!
+
+
 How to Get Help
 ========================================================
-In the console, type `?geom_point` to pull up documentation
+In the console, type `?geom_point` to pull up documentation on a geom or function...
+
+or browse the full documentation at `http://ggplot2.tidyverse.org/reference/` ...
+
+
+Exercises
+========================================================
+![Recreate this image!](figs/economist.png)
 
 
 Other topics
 ========================================================
 
--Interaction : making your ggplots interactive!
--Other fun graphs : Maps!
+- Interaction : making your ggplots interactive!
+- Other fun graphs : Maps!
 
 Plotly and ggplot
 ========================================================
