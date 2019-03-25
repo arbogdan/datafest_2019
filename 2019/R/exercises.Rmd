@@ -1,7 +1,11 @@
 ---
 title: "DataFest 2019 Modeling Exercises"
 date: "3/25/2019"
-output: pdf_document
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+
 ---
 
 ```{r setup, include=FALSE}
@@ -9,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE, message = F, warning = F)
 ```
 
 ## Intro and Data Processing
-Some text and introduction to the dataset. 
+The data for this exercise comes from Kaggle and is the same weather-related observations used in previous workshops (head on over to [Kaggle]() and create an account/download the data if you haven't already!) As stated in the presentation, modeling is typically one of the last steps of the data science pipeline; therefore, there are a few steps for us to carry out before beginning these exercises. We first read in each of the individual tables, transfer them from wide to long format, then join all of them into a single dataframe.  
 
 ```{r}
 library(tidyverse)
@@ -82,18 +86,20 @@ dat <- dat %>%
   )
 ```
 
-**Exercise 1** Fit a classification model of your choice to predict `weather_binary`, and interpret its confusion matrix when applied to held-out data. What is your interpretation of the model's performance? 
+**Exercise 1** Fit a classification model of your choice to predict `weather_binary`, and interpret its confusion matrix when applied to held-out testing data. How would you judge the model's performance? Justify your answer. 
 
 **Exercise 2** Fit a classification model of your choice to predict `weather_broad`. Explain the model's performance, and how your interpretation of its confusion matrix changes in a multi-class scenario.  
 
 ## Regression 
 
-For this portion of the example, choose a continuous variable of interest (for example, `temperature`) then predict it using a regression technique. 
+For the following exercises, choose a continuous variable of interest in the dataset (for example, `temperature`).
 
-**Exercise 3** For your variable of choice, fit a linear regression model using only the single variable that best explains it (how could you figure this out from the data at hand?). Perform any necessary diagnostics or analysis required to make a conclusion about its interpretation and performance. How does this change if more variables are added? 
+**Exercise 3** For your variable of choice, fit a linear regression model using only the single variable that best explains it (how could you figure this out from the data at hand?). Perform any necessary diagnostics or analysis required to make a conclusion about its interpretation and performance. How does this change if more variables are added? Why do you think that is? 
 
 **Exercise 4** Try picking a different variable than the one selected before, and use a regression method of your choice to predict it. What is the MSE on test data, and how do you interpret it? 
 
 ## Conclusion 
 
-**Exercise 5** In the
+In these exercises, we practiced techniques introduced in the lecture portion of the workshop on a dataset similar to what you might see during DataFest 2019. However, we were only able to cover a small portion of what modeling fully entails, and in the real world it is common for the success of a model to be driven by many factors external to which algorithm or hyperparameters were chosen for your model. A common issue is data scarcity or quality - as they say, "trash in, trash out". Oftentimes it is much more helpful to consider the bigger picture of the analysis at hand rather than the minutia involved in model performance (but not always!). 
+
+**Exercise 5** Can you imagine any other ways in which modeling the weather could be helpful, and potential targets to predict given the dataset at hand? If you could have additional or different data to help in this task, what would you choose? Given the models created during this workshop, how would you recommend they be applied to a real-world problem? 
