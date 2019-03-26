@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE, message = F, warning = F)
 ```
 
 ## Intro and Data Processing
-The data for this exercise comes from Kaggle and is the same weather-related observations used in previous workshops (head on over to [Kaggle]() and create an account/download the data if you haven't already!) As stated in the presentation, modeling is typically one of the last steps of the data science pipeline; therefore, there are a few steps for us to carry out before beginning these exercises. We first read in each of the individual tables, transfer them from wide to long format, then join all of them into a single dataframe.  
+The data for this exercise comes from Kaggle and is the set of same weather-related observations used in previous workshops (head on over to [Kaggle](https://www.kaggle.com/selfishgene/historical-hourly-weather-data#temperature.csv) and create an account/download the data if you haven't already!) As stated in the presentation, modeling is typically one of the last steps of the data science pipeline; therefore, there are a few steps for us to carry out before beginning these exercises. We first read in each of the individual tables, transfer them from wide to long format, then join all of them into a single dataframe.  
 
 ```{r}
 library(tidyverse)
@@ -44,13 +44,14 @@ dat <- humidity %>%
 
 Let's take a look at the final dataset - what do you observe that could impact a model's performance? Feel free to perform additioal EDA as required before beginning the modeling stage. 
 ```{r}
-glimpse(dat)
+skimr::skim(dat)
 ```
 
 ## Classification 
 
 Since the `weather` variables has over 50 different values (run `unique(dat$weather)` to see them all for yourself!) we need to do some preprocessing in order to make this a more suitable target for modeling efforts. 
 ```{r}
+#clean up this code
 #binary classification 
 dat <- dat %>% 
   mutate("weather_binary" = ifelse(weather %in% c("sky is clear", "broken clouds", "few clouds", 
@@ -100,6 +101,6 @@ For the following exercises, choose a continuous variable of interest in the dat
 
 ## Conclusion 
 
-In these exercises, we practiced techniques introduced in the lecture portion of the workshop on a dataset similar to what you might see during DataFest 2019. However, we were only able to cover a small portion of what modeling fully entails, and in the real world it is common for the success of a model to be driven by many factors external to which algorithm or hyperparameters were chosen for your model. A common issue is data scarcity or quality - as they say, "trash in, trash out". Oftentimes it is much more helpful to consider the bigger picture of the analysis at hand rather than the minutia involved in model performance (but not always!). 
+In these exercises, we practiced techniques introduced in the lecture portion of the workshop on a dataset similar to what you might see during DataFest 2019. However, we were only able to cover a small portion of what modeling fully entails, and in the real world it is common for the success of a model to be driven by many factors external to which algorithm or hyperparameters were chosen. A common issue is data scarcity or quality - as is often said in regards to a machine learning model, "garbage in, garbage out". Oftentimes (but not always!) it is much more helpful to consider the bigger picture of the analysis at hand rather than the minutia involved in model performance. 
 
 **Exercise 5** Can you imagine any other ways in which modeling the weather could be helpful, and potential targets to predict given the dataset at hand? If you could have additional or different data to help in this task, what would you choose? Given the models created during this workshop, how would you recommend they be applied to a real-world problem? 

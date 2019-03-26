@@ -289,7 +289,7 @@ div.tocify {
 
 <div id="intro-and-data-processing" class="section level2">
 <h2>Intro and Data Processing</h2>
-<p>The data for this exercise comes from Kaggle and is the same weather-related observations used in previous workshops (head on over to <a href>Kaggle</a> and create an account/download the data if you haven’t already!) As stated in the presentation, modeling is typically one of the last steps of the data science pipeline; therefore, there are a few steps for us to carry out before beginning these exercises. We first read in each of the individual tables, transfer them from wide to long format, then join all of them into a single dataframe.</p>
+<p>The data for this exercise comes from Kaggle and is the set of same weather-related observations used in previous workshops (head on over to <a href="https://www.kaggle.com/selfishgene/historical-hourly-weather-data#temperature.csv">Kaggle</a> and create an account/download the data if you haven’t already!) As stated in the presentation, modeling is typically one of the last steps of the data science pipeline; therefore, there are a few steps for us to carry out before beginning these exercises. We first read in each of the individual tables, transfer them from wide to long format, then join all of them into a single dataframe.</p>
 <pre class="r"><code>library(tidyverse)
 library(lubridate)
 cities &lt;- read.csv(&quot;/Users/mm06832/Documents/Projects/datafest/2019/data/city_attributes.csv&quot;) 
@@ -377,7 +377,7 @@ dat &lt;- dat %&gt;%
 </div>
 <div id="conclusion" class="section level2">
 <h2>Conclusion</h2>
-<p>In these exercises, we practiced techniques introduced in the lecture portion of the workshop on a dataset similar to what you might see during DataFest 2019. However, we were only able to cover a small portion of what modeling fully entails, and in the real world it is common for the success of a model to be driven by many factors external to which algorithm or hyperparameters were chosen for your model. A common issue is data scarcity or quality - as they say, “trash in, trash out”. Oftentimes it is much more helpful to consider the bigger picture of the analysis at hand rather than the minutia involved in model performance (but not always!).</p>
+<p>In these exercises, we practiced techniques introduced in the lecture portion of the workshop on a dataset similar to what you might see during DataFest 2019. However, we were only able to cover a small portion of what modeling fully entails, and in the real world it is common for the success of a model to be driven by many factors external to which algorithm or hyperparameters were chosen. A common issue is data scarcity or quality - as is often said in regards to a machine learning model, “trash in, trash out”. Oftentimes (but not always!) it is much more helpful to consider the bigger picture of the analysis at hand rather than the minutia involved in model performance.</p>
 <p><strong>Exercise 5</strong> Can you imagine any other ways in which modeling the weather could be helpful, and potential targets to predict given the dataset at hand? If you could have additional or different data to help in this task, what would you choose? Given the models created during this workshop, how would you recommend they be applied to a real-world problem?</p>
 </div>
 
