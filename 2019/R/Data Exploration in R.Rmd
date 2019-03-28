@@ -1,0 +1,293 @@
+---
+title: "Data Exploration in R"
+output: html_document
+author: Deepshikha Adhikari
+date: 03/30/2019
+---
+PART 1: DATA EXPLORATION (30 min)
+
+Install Packages
+```{r, warning=FALSE}
+#install.packages('nycflights13')
+#install.packages('lubridate')
+#install.packages('dplyr')
+#install.packages('skimr')
+library(nycflights13)
+library(skimr)
+library(lubridate)
+library(dplyr)
+```
+
+Before getting started, use the right file 
+```{r}
+filepath_to_directory <- '~/Documents/datafest/2019/R'
+filepath_to_data <- '~/Documents/datafest/2019/data/'
+setwd(filepath_to_directory)
+```
+
+
+Load Data
+```{r}
+#Load single file at a time:
+city_attributes <- read.csv(file = paste(filepath_to_data,'city_attributes.csv', sep = ""))
+city_attributes <- read.csv(file = '~/Documents/Data_Exploration/data/city_attributes.csv')
+
+#Load all files altogether
+temp = list.files(path = filepath_to_data, pattern = "*.csv")
+for (i in 1:length(temp)) 
+  assign(temp[i], read.csv(file = paste(filepath_to_data,temp[i], sep = "")))
+
+```
+
+
+Let's pick one dataset
+```{r}
+#Dimension of the dataset
+humidity.csv %>% 
+  dim()
+
+#Names of the columns
+humidity.csv %>% names()
+
+#Top n of the dataset
+humidity.csv %>% head(n = 5) 
+
+#Bottom n of the dataset
+humidity.csv %>% tail(n = 5) 
+
+#Random n rows
+sample_n(humidity.csv, 5)
+
+```
+
+Sample the dataset.
+```{r}
+#Pop quiz: When you might wanna use it?
+set.seed(100)
+smp_size <- floor(0.8 * nrow(humidity.csv))
+train_ind <- sample(seq_len(nrow(humidity.csv)), size = smp_size)
+
+train <- humidity.csv[train_ind, ]
+test <- humidity.csv[-train_ind, ]
+
+```
+
+
+How to sort the data?
+```{r}
+#Sort the data
+humidity.csv %>% head(n = 5) %>% select(datetime)
+
+#Decreasing Order
+humidity.csv %>% arrange(desc(datetime)) %>% select(datetime) %>% head()
+
+#Increasing Order 
+humidity.csv %>% arrange(datetime) %>% select(datetime) %>% head()
+
+#Increasing Order 
+pressure.csv %>% arrange(Atlanta, Portland) %>% select(Atlanta,Portland) %>% head(n = 5)
+```
+
+
+The most amazing function for Exploration in R
+-Data Type?
+-Missing vals
+- Mean/Max/Unique 
+```{r}
+skimr::skim(humidity.csv)
+```
+
+
+Interested in a single variables:
+```{r}
+#Min/Max
+humidity.csv %>% 
+  select(Seattle) %>% 
+  min(na.rm = TRUE)
+
+#Frequency Table
+humidity.csv %>% 
+  select(Seattle) %>% 
+  table()
+#OR
+table(humidity.csv$Seattle)
+
+#Total Unique items
+length(unique(humidity.csv$Seattle))
+
+#Data type 
+class(humidity.csv)
+class(humidity.csv$datetime)
+
+#histogram
+hist(humidity.csv$Seattle)
+
+```
+
+
+Dealing with missing data
+```{r}
+#Missing 
+sum(is.na(humidity.csv$Seattle))
+
+#front-fill
+
+
+#back-fill
+
+#data imputer with mean
+
+
+#data imputer with median
+
+```
+
+
+Getting rid of duplicate Dataset:
+```{r}
+pressure.csv %>% select(Atlanta) %>% distinct()
+```
+
+Changing datatype
+```{r}
+
+```
+
+Count average sum
+```{r}
+
+```
+
+
+============================================================================================================
+PART 2: LUBRIDATE(20 min)
+https://r4ds.had.co.nz/
+```{r}
+skimr::skim(flights)
+names(flights)
+```
+
+Parsing dates
+========================================================
+year, month, day
+```{r}
+lubridate::ymd("20100604")
+lubridate::mdy("06-04-2011")
+lubridate::dmy("04/06/2011")
+lubridate::ymd("")
+```
+
+Parsing datetime
+========================================================
+year, month, day, hour, minute, second, **datetime**
+```{r}
+ymd_hms("2015-09-09 14:00:00")
+#as_datetime('2015-09-03 16:37:00Z')
+
+```
+
+Parsing and Formats (DateTime)
+========================================================
+```{r}
+johns_bday <- ymd_hms("1991-01-2000:20:00")
+date(johns_bday)
+hour(johns_bday)
+```
+
+Flights!
+========================================================
+take a look at the flights data set
+```{r}
+cat(names(flights))
+```
+
+Mutate a Date!
+========================================================
+incremental: true
+```{r}
+flights <- flights %>% mutate(date = ymd(paste0(year, "-", month, "-", day)))
+```
+
+
+```{r}
+flights <- flights %>% mutate(date_time = ymd_hm(paste0(year, "-", month, "-", day, " ", hour, ":", minute)))
+```
+
+```{r}
+flights %>% select(date_time)
+```
+
+Sort by Date
+========================================================
+```{r}
+flights %>% arrange(date) %>% select(date) %>% head()
+```
+
+Accessor Functions
+========================================================
+what day of the week was Dana born on?
+```{r}
+dees_bday <- ymd("1991-09-30")
+month(danas_bday)
+wday(danas_bday)
+```
+
+First Flight of each Month (Question)
+========================================================
+aggregator functions!
+```{r}
+flights %>% arrange(date_time) %>% group_by(month(date_time)) %>% 
+    filter(row_number() == 1) %>% ungroup() %>% select(date_time, tailnum)
+```
+
+Time Series
+========================================================
+get all flights of a certain plane, "N14228"
+```{r}
+flights %>% filter(tailnum == 'N14228') %>% arrange(date_time) %>% select(date_time, tailnum)
+```
+
+what day of the week was N0EGMQ's 100th flight?
+```{r}
+flights %>% filter(tailnum == 'N0EGMQ') %>% 
+    arrange(date_time) %>% filter(row_number() == 100) %>%
+    select(date_time) %>% mutate(wday(date_time))
+```
+
+Today!
+========================================================
+what if we want the date today?
+```{r}
+date <- today()
+date
+```
+
+Intervals!
+========================================================
+how old is John?
+```{r}
+johns_bday <- ymd("1991-01-20")
+today() - johns_bday
+```
+
+Durations!
+========================================================
+how old is John?
+```{r}
+johns_bday <- ymd("1991-01-20")
+johns_duration <- as.duration(today() - johns_bday)
+johns_duration
+```
+
+Durations!
+========================================================
+how old is John... in weeks?
+```{r}
+johns_bday <- ymd("1991-01-20")
+johns_duration <- as.duration(today() - johns_bday)
+johns_duration / dweeks(1)
+```
+
+
+
+
