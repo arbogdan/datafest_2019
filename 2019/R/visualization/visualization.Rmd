@@ -1,0 +1,348 @@
+---
+title: "Data Visualization in R"
+output:
+  html_document:
+    df_print: paged
+---
+
+Make sure your working directory is set to this folder!
+```{r}
+# setwd('PATH_TO_YOUR_REPO/datafest/2019/R/visualization')
+```
+
+The tidyverse contains the packages `ggplot2`, `readr`, and `dplyr`
+```{r message = FALSE, warning = FALSE}
+# install.packages('tidyverse')
+# install.packages('lubridate')
+library(tidyverse)
+library(lubridate)
+```
+
+```{r}
+humidity <- read_csv('../../data/humidity.csv')
+head(humidity)
+```
+
+A typical ggplot2 call & translation
+```{r fig.width=18}
+ggplot(humidity[1:100,], aes(x = datetime, y = Vancouver)) +
+  geom_point() +
+  geom_smooth(method = 'lm')
+```
+
+We pass *data* into the ggplot function, add *geoms* separated by `+`, and specify *aesthetics* with `aes()`
+```{r}
+humidity_long <- humidity %>%
+  gather('City', 'Humidity', -datetime)
+head(humidity_long)
+```
+
+Let's make a more interesting dataset
+```{r}
+temperature <- read_csv('../../data/temperature.csv')
+temperature_long <- temperature %>%
+  gather('City', 'Temperature', -datetime) %>%
+  mutate(Temperature = Temperature * 9 / 5 - 459.67)
+temp_and_humidity <- humidity_long %>%
+  left_join(temperature_long, by = c('datetime', 'City')) %>%
+  filter(City %in% c('Vancouver', 'Portland', 'Seattle', 'San Francisco'),
+         datetime < as.Date('2013-01-01'))
+head(temp_and_humidity)
+```
+
+
+- Initialize empty graphic
+- We will add our plot to this base plot
+- Feed base plot data, x and y values
+```{r}
+plot <- ggplot(temp_and_humidity, aes(x = Humidity, y = Temperature))
+plot
+```
+
+We have specified aesthetics, but haven't added any geoms!
+Tip: Specify aesthetics in the main ggplot call to keep the mapping
+consistent across different geoms
+```{r}
+plot + geom_point()
+```
+
+We can add aesthetic mappings for individual geoms using `aes()`
+```{r}
+plot + geom_point(aes(color = City))
+```
+
+We can hard-code aesthetic values within geoms by passing them in as arguments WITHOUT using `aes()`
+```{r}
+plot + geom_point(color = 'blue', size = 5, shape = 25, alpha = .5)
+```
+
+Be careful not to use too many aesthetics in one plot...
+```{r}
+plot + geom_point(aes(shape = City, color = factor(month(datetime))), size = 3)
+```
+
+Line chart
+```{r}
+plot2 <- ggplot(temp_and_humidity, aes(x = datetime, y = Temperature))
+plot2 +
+  geom_line(aes(group = City, color = City))
+```
+
+
+Using the `facet` command is an easy to make plots on subsets of data
+```{r fig.width=18}
+plot2 +
+  geom_line() +
+  facet_wrap(~City)
+```
+
+
+Box plot:
+```{r}
+plot3 <- ggplot(temp_and_humidity, aes(x = City, y = Temperature))
+plot3 + geom_boxplot()
+```
+
+Box plots have a fill aesthetic as well as a color
+```{r}
+plot3 + geom_boxplot(fill = 'lightblue', color = 'black')
+```
+
+We can also adjust the appearance of the outliers
+```{r}
+plot3 + geom_boxplot(outlier.colour = 'red', outlier.shape = 25)
+```
+
+If we add another aesthetic mapping, we get more boxes
+```{r}
+plot3 + geom_boxplot(aes(color = factor(month(datetime))))
+```
+
+Histograms apply a *statistic* (binning) to data before plotting
+```{r}
+plot4 <- temp_and_humidity %>%
+  ggplot(aes(x = Temperature))
+plot4 + geom_histogram()
+```
+
+Again, if we add more aesthetic mappings, we get more bars. Stacked histograms are the default
+```{r}
+plot4 + geom_histogram(aes(fill = City))
+```
+
+We can also make them side-by-side
+```{r}
+plot4 + geom_histogram(aes(fill = City), position = 'dodge')
+```
+
+Density charts also compute statistics and convey similar information to a histogram
+```{r}
+plot4 + geom_density()
+```
+
+Smaller bandwidth adjustment
+```{r}
+plot4 + geom_density(adjust = .01)
+```
+
+Larger bandwidth adjustment
+```{r}
+plot4 + geom_density(adjust = 100)
+```
+
+Stacked density plot
+```{r}
+plot4 + geom_density(aes(color = City, fill = City), position = 'stack')
+```
+
+
+Style adjustments
+```{r}
+ggplot(temp_and_humidity,
+       aes(x = hour(datetime) + minute(datetime) / 60, y = Temperature)) +
+  geom_line(aes(group = factor(date(datetime))), size = 0.1) +
+  facet_wrap(~City) +
+  xlab('Time') +
+  ggtitle('Daily Temperature in Fall 2012') +
+  theme_minimal()
+```
+
+Basic geospatial data
+```{r}
+# install.packages('maps')
+# install.packages('choroplethr')
+library(maps)
+library(choroplethr)
+data(df_state_demographics)
+states <- map_data('state')
+state_data <- df_state_demographics %>% left_join(states, by = 'region')
+head(state_data)
+```
+
+Using `coord_map` we constrain the scales of the x and y axis to correspond to a certain map projection (default is mercator)
+```{r}
+ggplot(state_data, aes(x = long, y = lat)) +
+  geom_polygon(aes(group = group, fill = median_rent)) +
+  coord_map()
+```
+
+A geom can be generated with new data and separately specified aesthetics
+```{r}
+city <- read_csv('../../data/city_attributes.csv')
+ggplot(state_data, aes(x = long, y = lat)) +
+  geom_polygon(aes(group = group),
+               color = 'black', fill = 'white', alpha = 0.5, size = 0.25) +
+  geom_point(data = city %>% filter(Country == 'United States'),
+             aes(x = Longitude, y = Latitude)) +
+  coord_map()
+```
+
+A more interesting map
+```{r}
+mean_temp_data <- temperature_long %>%
+  filter(!is.na(Temperature)) %>%
+  mutate(date = date(datetime)) %>%
+  group_by(City, date) %>%
+  summarize(high = max(Temperature)) %>%
+  group_by(City) %>%
+  summarize(mean_high = mean(high)) %>%
+  left_join(city) %>%
+  filter(Country == 'United States')
+
+ggplot(state_data, aes(x = long, y = lat)) +
+  geom_polygon(aes(group = group),
+               color = 'black', fill = 'white', alpha = 0.5, size = 0.25) +
+  geom_point(data = mean_temp_data,
+             aes(x = Longitude, y = Latitude, color = mean_high)) +
+  scale_color_distiller(palette = "Spectral") +
+  coord_map()
+```
+
+
+Simple Features
+```{r}
+# install.packages('sf')
+library(sf)
+```
+
+- Simple Features are a standard storage and access model of 2D geometries used by geographic information systems
+- The simple features package in R enables users to read, write, create, and manipulate data in this format
+
+
+Since our data is not already in simple feature format, we need to do some processing to convert it. We will practice on the state of Massachusetts. The first step is to split the data into a list of the 3 polygons that make up the state.
+```{r}
+mass_list <- states %>%
+  filter(region == 'massachusetts') %>%
+  group_by(group) %>%
+  group_split()
+str(mass_list)
+```
+
+
+
+In simple features, we need each polygon to be a list of matrices which represent "rings"
+```{r}
+mass_matrix_list <- mass_list %>%
+  purrr::map(function(x) x %>% select(long, lat) %>% as.matrix() %>% list())
+str(mass_matrix_list)
+```
+
+Finally, we can create a multipolygon object
+```{r}
+mass_polygon <- st_multipolygon(mass_matrix_list)
+ggplot(mass_polygon) + geom_sf()
+```
+
+An advantage of doing this is the ability to use special geometric operations on the data
+```{r}
+# connecticut and pennsylvania only have one polygon each
+ct_polygon <- states %>%
+  filter(region == 'connecticut') %>%
+  select(long, lat) %>%
+  as.matrix() %>%
+  list() %>%
+  st_polygon()
+
+penn_polygon <- states %>%
+  filter(region == 'pennsylvania') %>%
+  select(long, lat) %>%
+  as.matrix() %>%
+  list() %>%
+  st_polygon()
+
+st_touches(ct_polygon, mass_polygon, sparse = F)
+st_touches(penn_polygon, mass_polygon, sparse = F)
+```
+
+
+
+Something fancy: plot the set of states that border a certain state
+```{r}
+make_polygons_from_groups <- function(dat) {
+  poly_list <- dat %>%
+    group_by(group) %>%
+    group_split() %>%
+    purrr::map(function(x) x %>% select(long, lat) %>% as.matrix() %>% list())
+
+  if (length(poly_list) == 1) st_polygon(flatten(poly_list)) else st_multipolygon(poly_list)
+}
+
+state_sf <- states %>%
+  group_by(region) %>%
+  group_split() %>%
+  purrr::map(make_polygons_from_groups) %>%
+  st_sfc()
+
+intersections <- st_intersects(state_sf, sparse = F)
+ggplot() +
+  # first geom represents the states which intersect State 1
+  geom_sf(data = state_sf[intersections[1,]], fill = 'red') +
+  # second geom represents State 1
+  geom_sf(data = state_sf[1], fill = 'blue')
+```
+
+
+
+In the console, type `?geom_point` to pull up documentation on a geom or function...
+or browse the full documentation at `http://ggplot2.tidyverse.org/reference/` ...
+
+Tons of more resrouces, try them out!
+- <http://docs.ggplot2.org/current/>
+- <https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf>
+- <https://r-spatial.github.io/sf/index.html>
+- <https://github.com/rstudio/cheatsheets/raw/master/sf.pdf>
+- <http://www.sthda.com/english/wiki/be-awesome-in-ggplot2-a-practical-guide-to-be-highly-effective-r-software-and-data-visualization>
+
+
+
+
+
+
+
+## EXERCISES
+
+Make visualizations to answer the following questions!
+
+
+1. Which city gets coldest in March?
+
+
+2. How has the temperature in Boston in March changed over the years?
+
+
+3. Which cities show the most dramatic changes in temperature throughout the year?
+
+
+4. Which is the most humid season in the Pacific Northwest?
+
+
+5. Does the coldest hour of the day vary dramatically from month to month in any city or region?
+
+
+
+Challenge plots in SF (use the `state_sf` object and the cheatsheet above to identify appropriate functions):
+
+1. Create simple features for the centroids of each state. Color them red if they are within 200 miles of another state.
+
+2. Create a map of America where the color of the state refers to the mean `per_capital_income` of all tangential states.
+
