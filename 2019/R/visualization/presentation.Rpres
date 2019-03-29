@@ -1,0 +1,524 @@
+<style>
+.small-code pre code {
+  font-size: 1.2em;
+}
+</style>
+
+Visualization in R
+========================================================
+author: Lizzie Kumar
+date: March 30, 2019
+autosize: true
+
+ggplot2
+========================================================
+
+- Library in R that makes nice graphics
+- Makes creation of good looking, useful graphics much easier than base R
+- Consistent with a *grammar of graphics*
+
+ggplot2
+========================================================
+Plot = Data + Aesthetics + Geometric Objects
+
+
+Definitions: Aesthetics
+========================================================
+
+Mapping of information to a visual property
+- Categorical -> Color
+- Numerical -> Position
+- ...
+
+Definitions: Aesthetics
+========================================================
+
+Mapping of information to a visual property
+- Categorical -> Color
+- Numerical -> Position
+- Categorical -> Shape
+- Numerical -> Color
+- Numerical -> Size
+- Numerical -> Transparency
+- ...
+
+Definitions: Geoms
+========================================================
+
+A geometric object
+- Point
+- Line
+- ...
+
+Definitions: Geoms
+========================================================
+
+A geometric object
+- Point
+- Line
+- Bar
+- Box-and-whisker
+- Polygon
+- ...
+
+
+Set Up
+========================================================
+```{r, warnings = F}
+# install.packages('tidyverse')
+# install.packages('lubridate')
+library(tidyverse)
+library(lubridate)
+```
+The tidyverse contains the packages `ggplot2`, `readr`, and `dplyr`
+
+Data
+========================================================
+class: small-code
+```{r}
+# setwd('PATH_TO_YOUR_REPO/datafest/2019/R/visualization')
+humidity <- read_csv('../../data/humidity.csv')
+head(humidity)
+```
+
+A typical ggplot2 call & translation
+========================================================
+```{r fig.width=18}
+ggplot(humidity[1:100,], aes(x = datetime, y = Vancouver)) +
+  geom_point() +
+  geom_smooth(method = 'lm')
+```
+
+We pass *data* into the ggplot function,
+add *geoms* separated by `+`,
+and specify *aesthetics* with `aes()`
+
+Setup
+========================================================
+class: small-code
+```{r}
+humidity_long <- humidity %>%
+  gather('City', 'Humidity', -datetime)
+head(humidity_long)
+```
+
+Setup
+========================================================
+class: small-code
+```{r}
+temperature <- read_csv('../../data/temperature.csv')
+temperature_long <- temperature %>%
+  gather('City', 'Temperature', -datetime) %>%
+  mutate(Temperature = Temperature * 9 / 5 - 459.67)
+temp_and_humidity <- humidity_long %>%
+  left_join(temperature_long, by = c('datetime', 'City')) %>%
+  filter(City %in% c('Vancouver', 'Portland', 'Seattle', 'San Francisco'),
+         datetime < as.Date('2013-01-01'))
+head(temp_and_humidity)
+```
+
+Basic Plots
+========================================================
+- Scatter Plot
+- Line Chart
+- Bar Chart
+- Histogram
+- Density Plot
+- Box Plot
+
+Initialization
+========================================================
+- Initialize empty graphic
+- We will add our plot to this base plot
+- Feed base plot data, x and y values
+
+Initialization Continued
+========================================================
+class: small-code
+```{r fig.width=18}
+plot <- ggplot(temp_and_humidity, aes(x = Humidity, y = Temperature))
+plot
+```
+
+We have specified aesthetics, but haven't added any geoms!
+
+Tip: Specify aesthetics in the main ggplot call to keep the mapping
+consistent across different geoms
+
+Scatter Plot
+========================================================
+class: small-code
+```{r fig.width=18}
+plot + geom_point()
+```
+
+Scatter Plot Continued
+========================================================
+class: small-code
+```{r fig.width=18}
+plot + geom_point(aes(color = City))
+```
+
+We can add aesthetic mappings for individual geoms using `aes()`
+
+Scatter Plot Continued
+========================================================
+class: small-code
+```{r fig.width=18}
+plot + geom_point(color = 'blue', size = 5, shape = 25, alpha = .5)
+```
+
+We can hard-code aesthetic values within geoms by passing them in as arguments WITHOUT using `aes()`
+
+Scatter Plot Continued
+========================================================
+class: small-code
+```{r fig.width=18}
+plot + geom_point(aes(shape = City, color = factor(month(datetime))), size = 3)
+```
+
+
+Heat Map
+========================================================
+class: small-code
+```{r fig.width=18}
+plot + geom_bin2d(bins = 10)
+```
+
+
+Line Chart
+========================================================
+class: small-code
+```{r fig.width=18}
+plot2 <- ggplot(temp_and_humidity, aes(x = datetime, y = Temperature))
+plot2 +
+  geom_line(aes(group = City, color = City))
+```
+
+
+Line Chart Continued
+========================================================
+class: small-code
+```{r fig.width=18}
+plot2 +
+  geom_line() +
+  facet_wrap(~City)
+```
+
+Using the `facet` command is an easy to make plots on subsets of data
+
+Box Plot
+========================================================
+class: small-code
+```{r fig.width=18}
+plot3 <- ggplot(temp_and_humidity, aes(x = City, y = Temperature))
+plot3 + geom_boxplot()
+```
+
+Box Plot Continued
+========================================================
+class: small-code
+```{r fig.width=18}
+plot3 + geom_boxplot(fill = 'lightblue', colour = 'black')
+```
+
+Box Plot Continued
+========================================================
+class: small-code
+```{r fig.width=18}
+plot3 + geom_boxplot(outlier.colour = 'red', outlier.shape = 25)
+```
+
+Box Plot Continued
+========================================================
+class: small-code
+```{r fig.width=18}
+plot3 + geom_boxplot(aes(color = factor(month(datetime))))
+```
+
+Bar Chart
+========================================================
+class: small-code
+```{r fig.width=18}
+plot4 <- temp_and_humidity %>%
+  ggplot(aes(x = Temperature))
+plot4 + geom_histogram()
+```
+
+Bar Chart Continued
+========================================================
+class: small-code
+```{r fig.width=18}
+plot4 + geom_histogram(aes(fill = City))
+```
+
+Bar Chart Continued
+========================================================
+class: small-code
+```{r fig.width=18}
+plot4 + geom_histogram(aes(fill = City), position = 'dodge')
+```
+
+
+Density Chart
+========================================================
+class: small-code
+```{r fig.width=18}
+plot4 + geom_density()
+```
+
+Density Chart Continued
+========================================================
+class: small-code
+```{r fig.width=18}
+plot4 + geom_density(adjust = .01)
+```
+
+Density Chart Continued
+========================================================
+class: small-code
+```{r fig.width=18}
+plot4 + geom_density(adjust = 100)
+```
+
+Density Chart Continued
+========================================================
+class: small-code
+```{r fig.width=18}
+plot4 + geom_density(aes(color = City, fill = City))
+```
+
+Density Chart Continued
+========================================================
+class: small-code
+```{r fig.width=18}
+plot4 + geom_density(aes(color = City, fill = City), position = 'stack')
+```
+
+
+Style
+========================================================
+class: small-code
+```{r fig.width=18}
+ggplot(temp_and_humidity,
+       aes(x = hour(datetime) + minute(datetime) / 60, y = Temperature)) +
+  geom_line(aes(group = factor(date(datetime))), size = 0.1) +
+  facet_wrap(~City) +
+  xlab('Time') +
+  ggtitle('Daily Temperature in Fall 2012') +
+  theme_minimal()
+```
+
+Use `ggsave('filename.png')` to save the most recently displayed plot to a file!
+
+
+Geospatial Data
+========================================================
+
+
+
+Geospatial Data
+========================================================
+Data representing objects in space is referred to as geospatial data, and often has additional structure to ordinary dataframes
+
+
+
+Geospatial Data
+========================================================
+![Geospatial data example](figs/geo_data.png)
+
+
+Maps
+========================================================
+`ggplot` actually has the ability to plot maps using only tabular longitude and latitude data
+
+
+Maps
+========================================================
+class: small-code
+```{r}
+# install.packages('maps')
+# install.packages('choroplethr')
+library(maps)
+library(choroplethr)
+data(df_state_demographics)
+states <- map_data('state')
+state_data <- df_state_demographics %>% left_join(states, by = 'region')
+head(state_data)
+```
+
+Basic Map
+========================================================
+class: small-code
+```{r fig.width=18}
+ggplot(state_data, aes(x = long, y = lat)) +
+  geom_polygon(aes(group = group, fill = median_rent)) +
+  coord_map()
+```
+
+Using `coord_map` we constrain the scales of the x and y axis to correspond to a certain map projection (default is mercator)
+
+
+Basic Map
+========================================================
+class: small-code
+```{r fig.width=18}
+city <- read_csv('../../data/city_attributes.csv')
+ggplot(state_data, aes(x = long, y = lat)) +
+  geom_polygon(aes(group = group),
+               color = 'black', fill = 'white', alpha = 0.5, size = 0.25) +
+  geom_point(data = city %>% filter(Country == 'United States'),
+             aes(x = Longitude, y = Latitude)) +
+  coord_map()
+```
+
+Basic Map
+========================================================
+class: small-code
+```{r}
+mean_temp_data <- temperature_long %>%
+  mutate(date = date(datetime)) %>%
+  group_by(City, date) %>%
+  summarize(high = max(Temperature, na.rm = T)) %>%
+  group_by(City) %>%
+  summarize(mean_high = mean(high)) %>%
+  left_join(city) %>%
+  filter(Country == 'United States')
+
+ggplot(state_data, aes(x = long, y = lat)) +
+  geom_polygon(aes(group = group),
+               color = 'black', fill = 'white', alpha = 0.5, size = 0.25) +
+  geom_point(data = mean_temp_data,
+             aes(x = Longitude, y = Latitude, color = mean_high)) +
+  scale_color_distiller(palette = "Spectral") +
+  coord_map()
+```
+
+
+Simple Features
+========================================================
+class: small-code
+```{r}
+# install.packages('sf')
+library(sf)
+```
+
+- Simple Features are a standard storage and access model of 2D geometries used by geographic information systems
+- The simple features package in R enables users to read, write, create, and manipulate data in this format
+
+
+
+Simple Features
+========================================================
+class: small-code
+
+Since our data is not already in simple feature format, we need to do some processing to convert it. We will practice on the state of Massachusetts. The first step is to split the data into a list of the 3 polygons that make up the state.
+
+```{r}
+mass_list <- states %>%
+  filter(region == 'massachusetts') %>%
+  group_by(group) %>%
+  group_split()
+str(mass_list)
+```
+
+
+
+Simple Features
+========================================================
+class: small-code
+
+In simple features, we need each polygon to be a list of matrices which represent "rings"
+
+```{r}
+mass_matrix_list <- mass_list %>%
+  purrr::map(function(x) x %>% select(long, lat) %>% as.matrix() %>% list())
+print(mass_matrix_list)
+```
+
+Simple Features
+========================================================
+class: small-code
+
+Finally, we can create a multipolygon object
+
+```{r}
+mass_polygon <- st_multipolygon(mass_matrix_list)
+ggplot(mass_polygon) + geom_sf()
+```
+
+
+
+Simple Features
+========================================================
+class: small-code
+
+An advantage of doing this is the ability to use special geometric operations on the data
+```{r}
+# connecticut and pennsylvania only have one polygon each
+ct_polygon <- states %>%
+  filter(region == 'connecticut') %>%
+  select(long, lat) %>%
+  as.matrix() %>%
+  list() %>%
+  st_polygon()
+
+penn_polygon <- states %>%
+  filter(region == 'pennsylvania') %>%
+  select(long, lat) %>%
+  as.matrix() %>%
+  list() %>%
+  st_polygon()
+
+st_touches(ct_polygon, mass_polygon, sparse = F)
+st_touches(penn_polygon, mass_polygon, sparse = F)
+```
+
+
+
+
+
+Simple Features
+========================================================
+class: small-code
+```{r}
+make_polygons_from_groups <- function(dat) {
+  poly_list <- dat %>%
+    group_by(group) %>%
+    group_split() %>%
+    purrr::map(function(x) x %>% select(long, lat) %>% as.matrix() %>% list())
+
+  if (length(poly_list) == 1) st_polygon(flatten(poly_list)) else st_multipolygon(poly_list)
+}
+
+state_sf <- states %>%
+  group_by(region) %>%
+  group_split() %>%
+  purrr::map(make_polygons_from_groups) %>%
+  st_sfc()
+
+intersections <- st_intersects(state_sf, sparse = F)
+ggplot() +
+  # first geom represents the states which intersect State 1
+  geom_sf(data = state_sf[intersections[1,]], fill = 'red') +
+  # second geom represents State 1
+  geom_sf(data = state_sf[1], fill = 'blue')
+```
+
+
+How to Get Help
+========================================================
+In the console, type `?geom_point` to pull up documentation on a geom or function...
+
+or browse the full documentation at `http://ggplot2.tidyverse.org/reference/` ...
+
+
+More Resources
+========================================================
+Tons of more resources, try them out!
+- <http://docs.ggplot2.org/current/>
+- <https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf>
+- <https://r-spatial.github.io/sf/index.html>
+- <https://github.com/rstudio/cheatsheets/raw/master/sf.pdf>
+- <http://www.sthda.com/english/wiki/be-awesome-in-ggplot2-a-practical-guide-to-be-highly-effective-r-software-and-data-visualization>
+
