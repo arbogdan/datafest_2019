@@ -1,0 +1,22 @@
+---
+title: "Data_Exploration_excercises_r"
+output: html_document
+---
+
+Q1: What was the most common weather description recorded in Vancouver?
+
+
+
+Q2: Mutate a column named date_time that includes year, month, day, hour, minute
+
+
+
+Q3: First Flight of each Month (Question)
+
+
+
+Q4: What day of the week was N0EGMQ's 100th flight?
+
+
+
+Q5: How old is John in weeks?

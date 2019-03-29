@@ -1,0 +1,62 @@
+---
+title: "Data_Exploration_r_exercises"
+output: html_document
+---
+
+
+```{r}
+#install.packages('nycflights13')
+#install.packages('lubridate')
+#install.packages('dplyr')
+#install.packages('skimr')
+library(nycflights13)
+library(skimr)
+library(lubridate)
+library(dplyr)
+```
+
+
+Q1: What was the most common weather description recorded in Vancouver?
+```{r}
+weather_description.csv %>% 
+  group_by(Vancouver) %>% 
+  select(Vancouver) %>% 
+  tally() %>% 
+  arrange(desc(n)) %>% 
+  head()
+
+
+#If not that many levels
+table(weather_description.csv$Vancouver)
+```
+
+
+Q2: Mutate a column named date_time that includes year, month, day, hour, minute
+```{r}
+flights <- flights %>% 
+  mutate(date_time = ymd_hm(paste0(year, "-", month, "-", day, " ", hour, ":", minute)))
+```
+
+
+Q3:First Flight of each Month (Question)
+```{r}
+flights %>% arrange(date_time) %>% group_by(month(date_time)) %>% 
+  filter(row_number() == 1) %>% ungroup() %>% select(date_time, tailnum)
+```
+
+
+Q4:What day of the week was N0EGMQ's 100th flight?
+```{r}
+flights %>% filter(tailnum == 'N0EGMQ') %>% 
+  arrange(date_time) %>% filter(row_number() == 100) %>%
+  select(date_time) %>% mutate(wday(date_time))
+```
+
+
+Q5: How old is John in weeks?
+```{r}
+johns_bday <- ymd("1991-01-20")
+johns_duration <- as.duration(today() - johns_bday)
+johns_duration / dweeks(1)
+```
+
