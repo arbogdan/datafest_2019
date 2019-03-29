@@ -1,0 +1,106 @@
+---
+title: "DataFest 2019 Modeling Exercises"
+date: "3/25/2019"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = F, warning = F)
+```
+
+## Intro and Data Processing
+The data for this exercise comes from Kaggle and is the set of same weather-related observations used in previous workshops (head on over to [Kaggle](https://www.kaggle.com/selfishgene/historical-hourly-weather-data#temperature.csv) and create an account/download the data if you haven't already!) As stated in the presentation, modeling is typically one of the last steps of the data science pipeline; therefore, there are a few steps for us to carry out before beginning these exercises. We first read in each of the individual tables, transfer them from wide to long format, then join all of them into a single dataframe.  
+
+```{r}
+library(tidyverse)
+library(lubridate)
+cities <- read.csv("/Users/mm06832/Documents/Projects/datafest/2019/data/city_attributes.csv") 
+humidity <- read.csv("/Users/mm06832/Documents/Projects/datafest/2019/data/humidity.csv") %>% 
+  gather(2:37, key = "city", value = "humidity")
+pressure <- read.csv("/Users/mm06832/Documents/Projects/datafest/2019/data/pressure.csv") %>% 
+  gather(2:37, key = "city", value = "pressure")
+temperature <- read.csv("/Users/mm06832/Documents/Projects/datafest/2019/data/temperature.csv") %>% 
+  gather(2:37, key = "city", value = "temperature")
+weather <- read.csv("/Users/mm06832/Documents/Projects/datafest/2019/data/weather_description.csv") %>% 
+  gather(2:37, key = "city", value = "weather")
+wind_direction <- read.csv("/Users/mm06832/Documents/Projects/datafest/2019/data/wind_direction.csv") %>% 
+  gather(2:37, key = "city", value = "wind_direction")
+wind_speed <- read.csv("/Users/mm06832/Documents/Projects/datafest/2019/data/wind_speed.csv") %>% 
+  gather(2:37, key = "city", value = "wind_speed")
+
+#join tables into single dataset 
+dat <- humidity %>% 
+  inner_join(pressure, by = c("datetime", "city")) %>% 
+  inner_join(temperature,  by = c("datetime", "city")) %>% 
+  inner_join(weather, by = c("datetime", "city")) %>% 
+  inner_join(wind_direction, by = c("datetime", "city")) %>% 
+  inner_join(wind_speed, by = c("datetime", "city")) %>%
+  left_join(cities, by = c("city" = "City"))
+```
+
+Let's take a look at the final dataset - what do you observe that could impact a model's performance? Feel free to perform additioal EDA as required before beginning the modeling stage. 
+```{r}
+skimr::skim(dat)
+```
+
+## Classification 
+
+Since the `weather` variables has over 50 different values (run `unique(dat$weather)` to see them all for yourself!) we need to do some preprocessing in order to make this a more suitable target for modeling efforts. 
+```{r}
+#clean up this code
+#binary classification 
+dat <- dat %>% 
+  mutate("weather_binary" = ifelse(weather %in% c("sky is clear", "broken clouds", "few clouds", 
+                                                  "scattered clouds", "overcast clouds"), 
+                                  "good", 
+                                  "bad"))
+
+#multiclass classification
+dat <- dat %>% 
+  mutate("weather_broad" = case_when(
+                                  weather %in% c("drizzle", "freezing_rain", "heavy intensity drizzle", 
+                                                 "heavy intensity rain", "heavy intensity shower rain",
+                                                 "light intensity drizzle", "light intensity drizzle rain", 
+                                                 "light intensity shower rain", "light rain",
+                                                 "light shower rain", "moderate rain", "proximity moderate rain", 
+                                                 "ragged shower rain", "shower drizzle",
+                                                 "very heavy rain", "proximity shower rain") ~ "rain",
+                                  weather %in% c("broken clouds", "overcast clouds", 
+                                                 "scattered clouds", "few clouds") ~ "cloudy",
+                                  weather %in% c("heavy snow", "light rain and snow", "light shower sleet", 
+                                                 "light snow", "rain and snow", "shower snow",
+                                                 "sleet", "snow", "heavy shower snow") ~ "snow",
+                                  weather %in% c("thunderstorm with drizzle", "thunderstorm with heavy drizzle", 
+                                                 "thunderstorm with light drizzle",
+                                                 "thunderstorm with rain", "thunderstorm with light rain", 
+                                                 "heavy thunderstorm", "proximity thunderstorm",
+                                                 "proximity thunderstorm with drizzle", "proximity thunderstorm with rain", 
+                                                 "proximity thunderstorm",
+                                                 "thunderstorm", "ragged thunderstorm") ~ "thunder",
+                                  weather %in% c("sky is clear") ~ "clear",
+                                  TRUE ~ "Other"
+                            )
+  )
+```
+
+**Exercise 1** Fit a classification model of your choice to predict `weather_binary`, and interpret its confusion matrix when applied to held-out testing data. How would you judge the model's performance? Justify your answer. 
+
+**Exercise 2** Fit a classification model of your choice to predict `weather_broad`. Explain the model's performance, and how your interpretation of its confusion matrix changes in a multi-class scenario.  
+
+## Regression 
+
+For the following exercises, choose a continuous variable of interest in the dataset (for example, `temperature`).
+
+**Exercise 3** For your variable of choice, fit a linear regression model using only the single variable that best explains it (how could you figure this out from the data at hand?). Perform any necessary diagnostics or analysis required to make a conclusion about its interpretation and performance. How does this change if more variables are added? Why do you think that is? 
+
+**Exercise 4** Try picking a different variable than the one selected before, and use a regression method of your choice to predict it. What is the MSE on test data, and how do you interpret it? 
+
+## Conclusion 
+
+In these exercises, we practiced techniques introduced in the lecture portion of the workshop on a dataset similar to what you might see during DataFest 2019. However, we were only able to cover a small portion of what modeling fully entails, and in the real world it is common for the success of a model to be driven by many factors external to which algorithm or hyperparameters were chosen. A common issue is data scarcity or quality - as is often said in regards to a machine learning model, "garbage in, garbage out". Oftentimes (but not always!) it is much more helpful to consider the bigger picture of the analysis at hand rather than the minutia involved in model performance. 
+
+**Exercise 5** Can you imagine any other ways in which modeling the weather could be helpful, and potential targets to predict given the dataset at hand? If you could have additional or different data to help in this task, what would you choose? Given the models created during this workshop, how would you recommend they be applied to a real-world problem? 
