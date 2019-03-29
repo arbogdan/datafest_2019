@@ -20,3 +20,6 @@ vignettes/*.pdf
 
 .DS_Store
 *~
+.idea
+venv
+2019/python/viz/workspace/.ipynb_checkpoints
