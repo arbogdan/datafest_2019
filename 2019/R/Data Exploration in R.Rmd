@@ -130,15 +130,27 @@ Dealing with missing data
 #Missing 
 sum(is.na(humidity.csv$Seattle))
 
-#front-fill
+#first value!
+ test <- humidity.csv %>%
+  select(Seattle) %>%
+  arrange(Seattle) %>%
+  mutate(Seattle = first( Seattle))
 
+#mean/meadian/mode
+impute.mean <- function(x) replace(x, is.na(x), mean(x, na.rm = TRUE))
 
-#back-fill
+test2 <- humidity.csv %>%
+    select(Seattle) %>%
+    mutate(
+        Seattle = impute.mean(Seattle)
+    )
+ 
+#What about list of variables?
+test3 <- humidity.csv %>%
+   mutate_if(is.numeric,
+     funs(replace(.,is.na(.), impute.mean(.))))
 
-#data imputer with mean
-
-
-#data imputer with median
+#Question: How do you check if it worked or not?
 
 ```
 
@@ -150,12 +162,24 @@ pressure.csv %>% select(Atlanta) %>% distinct()
 
 Changing datatype
 ```{r}
+testing_matrix <- weather_description.csv %>% as.matrix()
 
+weather_description.csv <- weather_description.csv %>% 
+  mutate(datetime = as.Date(datetime))
 ```
 
-Count average sum
+Count, average, summerize
 ```{r}
+#count
+weather_description.csv %>% 
+  group_by(Seattle) %>% 
+  tally()
 
+
+#mean
+flights %>% 
+  group_by(tailnum) %>% 
+  summarise(mean_dist = mean(distance)) 
 ```
 
 
@@ -208,11 +232,7 @@ incremental: true
 flights <- flights %>% mutate(date = ymd(paste0(year, "-", month, "-", day)))
 ```
 
-
-```{r}
-flights <- flights %>% mutate(date_time = ymd_hm(paste0(year, "-", month, "-", day, " ", hour, ":", minute)))
-```
-
+Check it!
 ```{r}
 flights %>% select(date_time)
 ```
@@ -223,36 +243,21 @@ Sort by Date
 flights %>% arrange(date) %>% select(date) %>% head()
 ```
 
+Get all flights of a certain plane, "N14228"
+```{r}
+
+flights %>% filter(tailnum == 'N14228') %>% arrange(date_time) %>% select(date_time, tailnum)
+```
+
 Accessor Functions
 ========================================================
 what day of the week was Dana born on?
 ```{r}
-dees_bday <- ymd("1991-09-30")
+danas_bday <- ymd("1991-09-30")
 month(danas_bday)
 wday(danas_bday)
 ```
 
-First Flight of each Month (Question)
-========================================================
-aggregator functions!
-```{r}
-flights %>% arrange(date_time) %>% group_by(month(date_time)) %>% 
-    filter(row_number() == 1) %>% ungroup() %>% select(date_time, tailnum)
-```
-
-Time Series
-========================================================
-get all flights of a certain plane, "N14228"
-```{r}
-flights %>% filter(tailnum == 'N14228') %>% arrange(date_time) %>% select(date_time, tailnum)
-```
-
-what day of the week was N0EGMQ's 100th flight?
-```{r}
-flights %>% filter(tailnum == 'N0EGMQ') %>% 
-    arrange(date_time) %>% filter(row_number() == 100) %>%
-    select(date_time) %>% mutate(wday(date_time))
-```
 
 Today!
 ========================================================
@@ -277,15 +282,6 @@ how old is John?
 johns_bday <- ymd("1991-01-20")
 johns_duration <- as.duration(today() - johns_bday)
 johns_duration
-```
-
-Durations!
-========================================================
-how old is John... in weeks?
-```{r}
-johns_bday <- ymd("1991-01-20")
-johns_duration <- as.duration(today() - johns_bday)
-johns_duration / dweeks(1)
 ```
 
 
