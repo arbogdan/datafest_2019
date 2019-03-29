@@ -313,3 +313,36 @@ Tons of more resrouces, try them out!
 - <https://github.com/rstudio/cheatsheets/raw/master/sf.pdf>
 - <http://www.sthda.com/english/wiki/be-awesome-in-ggplot2-a-practical-guide-to-be-highly-effective-r-software-and-data-visualization>
 
+
+
+
+
+
+
+## EXERCISES
+
+Make visualizations to answer the following questions!
+
+
+1. Which city gets coldest in March?
+
+
+2. How has the temperature in Boston in March changed over the years?
+
+
+3. Which cities show the most dramatic changes in temperature throughout the year?
+
+
+4. Which is the most humid season in the Pacific Northwest?
+
+
+5. Does the coldest hour of the day vary dramatically from month to month in any city or region?
+
+
+
+Challenge plots in SF (use the `state_sf` object and the cheatsheet above to identify appropriate functions):
+
+1. Create simple features for the centroids of each state. Color them red if they are within 200 miles of another state.
+
+2. Create a map of America where the color of the state refers to the mean `per_capital_income` of all tangential states.
+
